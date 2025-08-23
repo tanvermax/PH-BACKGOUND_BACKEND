@@ -3,6 +3,7 @@ import { Server } from "http";
 import mongoose from "mongoose";
 import app from "./app";
 import { envVars } from "./app/config/env";
+import { seedSuperAdmin } from "./app/util/Seedsuperadmin";
 
 
 let server: Server;
@@ -32,7 +33,7 @@ const startServer = async () => {
 }
 
 startServer();
-
+seedSuperAdmin();
 
 
 process.on("SIGTERM", (err) => {
