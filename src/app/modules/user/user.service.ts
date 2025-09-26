@@ -11,9 +11,9 @@ const createUser = async (paylod: Partial<IUser>) => {
     const { email, password, ...rest } = paylod;
     const isUserExit = await User.findOne({ email });
 
-    // if (isUserExit) {
-    //     throw new AppError(httpStatus.BAD_REQUEST, "User alredy exit in")
-    // }
+    if (isUserExit) {
+        throw new AppError(httpStatus.BAD_REQUEST, "User alredy exit in")
+    }
 
     const hashespassword = await bcryptjs.hash(password as string, 10)
 

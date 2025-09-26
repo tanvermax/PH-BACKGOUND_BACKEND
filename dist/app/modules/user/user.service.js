@@ -33,9 +33,9 @@ const env_1 = require("../../config/env");
 const createUser = (paylod) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = paylod, rest = __rest(paylod, ["email", "password"]);
     const isUserExit = yield user_model_1.User.findOne({ email });
-    // if (isUserExit) {
-    //     throw new AppError(httpStatus.BAD_REQUEST, "User alredy exit in")
-    // }
+    if (isUserExit) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "User alredy exit in");
+    }
     const hashespassword = yield bcryptjs_1.default.hash(password, 10);
     // const isPasswordMatch = await bcryptjs.compare(password as string, hashespassword)
     const authProvider = { provider: "creadentials", providerId: email };
