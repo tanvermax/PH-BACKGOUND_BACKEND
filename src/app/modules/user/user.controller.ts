@@ -57,7 +57,7 @@ const upadteUser = catchAsync(async (req: Request, res: Response, next: NextFunc
     const verifiedToken = req.user;
     const payload = req.body
 
-    const user = await userServices.updateUser(userId, payload, verifiedToken)
+    const user = await userServices.updateUser(userId, payload, verifiedToken as JwtPayload)
 
     sendResponse(res, {
 
@@ -85,7 +85,7 @@ const getAllUser = catchAsync(async (req: Request, res: Response, next: NextFunc
         data: result.data,
         meta: result.meta
     })
-})
+}) 
 
 
 export const UserControlllers = {

@@ -1,5 +1,5 @@
 import httpStatus from 'http-status-codes';
-import AppError from "../../config/AppError";
+import AppError from "../../errorhelpers/AppError";
 import { IAuthProvider, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
 import bcryptjs from "bcryptjs"
@@ -11,9 +11,9 @@ const createUser = async (paylod: Partial<IUser>) => {
     const { email, password, ...rest } = paylod;
     const isUserExit = await User.findOne({ email });
 
-    if (isUserExit) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User alredy exit in")
-    }
+    // if (isUserExit) {
+    //     throw new AppError(httpStatus.BAD_REQUEST, "User alredy exit in")
+    // }
 
     const hashespassword = await bcryptjs.hash(password as string, 10)
 

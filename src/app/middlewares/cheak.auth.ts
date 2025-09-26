@@ -1,6 +1,6 @@
 import  httpStatus  from 'http-status-codes';
 import { NextFunction, Request, Response } from "express";
-import AppError from "../config/AppError";
+import AppError from "../errorhelpers/AppError";
 import { verifytoken } from "../util/jwt";
 import { envVars } from "../config/env";
 import { JwtPayload } from "jsonwebtoken";
@@ -33,7 +33,7 @@ export const CheckAuth = (...authRoles: string[]) =>  async (req: Request, res: 
         }
 
         if (!authRoles.includes(verifiedToken.role)) {
-            throw new AppError(403, "you are not permited to acces")
+            throw new AppError(403, "you are not permited to access")
         }
         req.user = verifiedToken;
         next()

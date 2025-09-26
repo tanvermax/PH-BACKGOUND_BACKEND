@@ -3,7 +3,7 @@ import { JwtPayload } from "jsonwebtoken"
 import { envVars } from "../config/env"
 import { IsActive, IUser } from "../modules/user/user.interface"
 import { genaratetoken, verifytoken } from "./jwt"
-import AppError from "../config/AppError"
+import AppError from "../errorhelpers/AppError"
 import { User } from '../modules/user/user.model';
 
 export const createUserToken = (user: Partial<IUser>) => {

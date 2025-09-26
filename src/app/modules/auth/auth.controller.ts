@@ -1,36 +1,47 @@
+import { JwtPayload } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from "express"
 import { catchAsync } from "../../util/catchasync"
 import { sendResponse } from "../../util/sendresponse"
 import httpStatus from "http-status-codes"
 import { AuthService } from "./auth.service"
-import AppError from "../../config/AppError"
+import AppError from "../../errorhelpers/AppError"
 import { setAuthCookie } from "../../util/setCookies"
+import { createUserToken } from '../../util/user.token';
+import { envVars } from '../../config/env';
+import passport from 'passport';
 
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const credentialsLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const loginInfo = await AuthService.credentialsLogin(req.body)
-
-    setAuthCookie(res, loginInfo)
-
-//   setAuthCookie(res, {
-//         accessToken: loginInfo.accesstoken,
-//         refreshToken: loginInfo.refreshToken
-//     })
-
-    res.cookie("refreshToken", loginInfo.refreshToken, {
-        httpOnly: true,
-        secure: false
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      passport.authenticate("local", async (err: any, user: any, info: any)=>{
+        if (err) {
+            return next(new AppError(401,err.message))
+        }
+        if (!user) {
+           return next(new AppError(401, info?.message))
+        }
 
 
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        message: "User Log in  successfully",
-        success: true,
-        data: loginInfo,
-    })
+        const userToken = await createUserToken(user)
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password: pass, ...rest } = user.toObject();
+
+        setAuthCookie(res, userToken)
+        
+        sendResponse(res, {
+            statusCode: httpStatus.OK,
+            message: "User Log in  successfully",
+            success: true,
+            data: {
+                accessToken: userToken.accesstoken,
+                refreshToken: userToken.refreshToken,
+                user: rest
+            }
+        })
+      })(req,res,next)
 })
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -65,15 +76,15 @@ const logout = catchAsync(async (req: Request, res: Response, next: NextFunction
     res.clearCookie("accessToken", {
         httpOnly: true,
         secure: false,
-        sameSite:"lax"
+        sameSite: "lax"
     })
 
     res.clearCookie("refreshToken", {
         httpOnly: true,
         secure: false,
-        sameSite:"lax"
+        sameSite: "lax"
     })
-    
+
     sendResponse(res, {
         statusCode: httpStatus.OK,
         message: "User Logout  successfully",
@@ -92,9 +103,34 @@ const reset_password = catchAsync(async (req: Request, res: Response, next: Next
 
     const decodedToken = req.user;
 
-    await AuthService.resetPassword(oldPassword,newPassword,decodedToken);
+    await AuthService.resetPassword(oldPassword, newPassword, decodedToken as JwtPayload);
 
 
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        message: "password changed  successfully",
+        success: true,
+        data: null,
+    })
+})
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const googlCallbackConmtroll = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+
+    let redirectTo = req.query.state ? req.query.state as string : " ";
+    if (redirectTo.startsWith("/")) {
+        redirectTo= redirectTo.slice(1)
+    }
+
+    const user = req.user;
+    console.log(user);
+    if (!user) {
+        throw new AppError(httpStatus.NOT_FOUND, "user not found")
+    }
+    const tokenInfo = createUserToken(user);
+    setAuthCookie(res, tokenInfo);
+
+    res.redirect(`${envVars.FRONT_END_URL}/${redirectTo}`)
     sendResponse(res, {
         statusCode: httpStatus.OK,
         message: "password changed  successfully",
@@ -106,5 +142,5 @@ const reset_password = catchAsync(async (req: Request, res: Response, next: Next
 
 
 export const AuthController = {
-    credentialsLogin, getNewAccessToken,logout,reset_password
+    credentialsLogin, getNewAccessToken, logout, reset_password, googlCallbackConmtroll
 }
