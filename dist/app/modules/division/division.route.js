@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DivisionRoute = void 0;
+const division_validion_1 = require("./division.validion");
+const express_1 = require("express");
+const division_controller_1 = require("./division.controller");
+const cheak_auth_1 = require("../../middlewares/cheak.auth");
+const user_interface_1 = require("../user/user.interface");
+const validationRequest_1 = require("../../middlewares/validationRequest");
+const router = (0, express_1.Router)();
+router.post("/create", (0, cheak_auth_1.CheckAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validationRequest_1.validateRequest)(division_validion_1.CreateDivisionZOdSchema), division_controller_1.DivisionController.createDivision);
+router.get("/", division_controller_1.DivisionController.getAllDivison);
+router.patch('/:id', (0, cheak_auth_1.CheckAuth)(user_interface_1.Role.ADMIN, user_interface_1.Role.SUPER_ADMIN), (0, validationRequest_1.validateRequest)(division_validion_1.UpdateDivisonSchema), division_controller_1.DivisionController.updateDivisions);
+router.delete('/:id', division_controller_1.DivisionController.deleteDivisons);
+exports.DivisionRoute = router;
